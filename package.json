@@ -1,0 +1,22 @@
+{
+  "name": "workapp",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "author": "navin@telusko",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "google-auth-library": "^8.7.0",
+    "mongodb": "^3.5.7",
+    "mongoose": "^5.9.13",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.20"
+  },
+  "description": ""
+}
