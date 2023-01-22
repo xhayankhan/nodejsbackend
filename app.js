@@ -25,7 +25,9 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const app = express();
-
+const db = require('./db');
+const connection = db.connect();
+let PORT =process.env.PORT||3000;
 // Parse JSON bodies
 app.use(bodyParser.json());
 
@@ -38,20 +40,20 @@ const DataSchema = new mongoose.Schema({
 });
 
 const Data = mongoose.model('Data', DataSchema);
-
+connection.once('open', () => {
 async function storeData(data) {
     // Connect to MongoDB
-    await mongoose.connect('mongodb://localhost/MeditationsDBX', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-    });
+    //     await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true,
+    // });
 
     // Create a new data object and save it to the database
     const dataToStore = new Data(data);
     await dataToStore.save();
 
     // Close the connection
-    await mongoose.connection.close();
+   // await mongoose.connection.close();
 }
 passport.use(new GoogleStrategy({
     clientID: '373766077119-0opquoutepu3urckf1gkmtvefg05dcqb.apps.googleusercontent.com',
@@ -79,37 +81,61 @@ const User = mongoose.model('users', new mongoose.Schema({
     image: { type: String, required: true },
 }));
 
-mongoose.connect('mongodb://localhost/MeditationsDBX', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
+// mongoose.connect('mongodb://localhost/MeditationsDBX', {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+// });
 app.post('/meditation', async (req, res) => {
+    try{
     console.log('request coming');
     // Store the data in MongoDB
     await storeData(req.body);
-    res.send('Data stored successfully');
+    res.send('Data stored successfully');}
+    catch(e){
+        console.log(e);
+        res.status(500).send(error);
+    }
+    finally{
+        //await mongoose.connection.close();
+
+    }
 });
 app.get('/meditation', async (req, res) => {
     try {
-        await mongoose.connect('mongodb://localhost/MeditationsDBX', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+    //    var connection= await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //         useNewUrlParser: true,
+    //         useUnifiedTopology: true,
+    //     });
         const allData = await Data.find();
         res.json(allData);
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
     } finally {
-        await mongoose.connection.close();
+       // await mongoose.connection.close();
     }
+});
+app.get('/meditation/:id', (req, res) => {
+    const connection = db._connection;
+    if (!connection) {
+        return res.status(500).send({ message: 'MongoDB connection is not established' });
+    }
+    Data.findOne({ _id: req.params.id }, (err, doc) => {
+        if (err) {
+            return res.status(500).send({ message: err.message });
+        }
+        if (!doc) {
+            return res.status(404).send({ message: `Document not found with id: ${req.params.id}` });
+        }
+        res.send(doc);
+    });
 });
 app.post('/meditation/:id', async (req, res) => {
     try {
-        await mongoose.connect('mongodb://localhost/MeditationsDBX', {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
+        // await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+        //     useNewUrlParser: true,
+        //     useUnifiedTopology: true,
+        // });
         const existingData = await Data.findById(req.params.id);
         if(existingData){
             existingData.meditations.push(req.body.meditations);
@@ -122,9 +148,9 @@ app.post('/meditation/:id', async (req, res) => {
         console.log(error);
         res.status(500).send(error);
     } finally {
-        await mongoose.connection.close();
+       // await mongoose.connection.close();
     }
 });
-app.listen(3000,'0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log('Server running on http://localhost:3000');
-});
+});});
