@@ -52,7 +52,7 @@ async function storeData(data) {
     const dataToStore = new Data(data);
     await dataToStore.save();
 
-    // Close the connection
+    
    // await mongoose.connection.close();
 }
 passport.use(new GoogleStrategy({
