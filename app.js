@@ -27,7 +27,7 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const app = express();
 const db = require('./db');
 const connection = db.connect();
-let PORT =process.env.PORT||3000;
+let PORT =8080;
 // Parse JSON bodies
 app.use(bodyParser.json());
 
