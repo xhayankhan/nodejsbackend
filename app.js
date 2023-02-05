@@ -38,8 +38,17 @@ const DataSchema = new mongoose.Schema({
         meditationTime: { type: String, required: true },
     }],
 });
-
+const mailingSchema = new mongoose.Schema({
+    email:{type:String,required:true},
+    name:{type:String,required:true},
+});
+const feedbackSchema = new mongoose.Schema({
+        comment:{type:String,required:true},
+        email:{type:String,required:true},    
+});
 const Data = mongoose.model('Data', DataSchema);
+const mailings = mongoose.model('Mailing', mailingSchema);
+const feedbacks = mongoose.model('Feedback', feedbackSchema);
 connection.once('open', () => {
 async function storeData(data) {
     // Connect to MongoDB
@@ -52,7 +61,35 @@ async function storeData(data) {
     const dataToStore = new Data(data);
     await dataToStore.save();
 
-    
+    // Close the connection
+   // await mongoose.connection.close();
+}
+async function storeFeedback(data) {
+    // Connect to MongoDB
+    //     await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true,
+    // });
+
+    // Create a new data object and save it to the database
+    const dataToStore = new feedbacks(data);
+    await dataToStore.save();
+
+    // Close the connection
+   // await mongoose.connection.close();
+}
+async function storeMailing(data) {
+    // Connect to MongoDB
+    //     await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //     useNewUrlParser: true,
+    //     useUnifiedTopology: true,
+    // });
+
+    // Create a new data object and save it to the database
+    const dataToStore = new mailings(data);
+    await dataToStore.save();
+
+    // Close the connection
    // await mongoose.connection.close();
 }
 passport.use(new GoogleStrategy({
@@ -98,6 +135,66 @@ app.post('/meditation', async (req, res) => {
     finally{
         //await mongoose.connection.close();
 
+    }
+});
+app.post('/feedback', async (req, res) => {
+    try{
+    console.log('request coming');
+    // Store the data in MongoDB
+    await storeFeedback(req.body);
+    res.send('Data stored successfully');}
+    catch(e){
+        console.log(e);
+        res.status(500).send(error);
+    }
+    finally{
+        //await mongoose.connection.close();
+
+    }
+});
+app.post('/mailing', async (req, res) => {
+    try{
+    console.log('request coming');
+    // Store the data in MongoDB
+    await storeMailing(req.body);
+    res.send('Data stored successfully');}
+    catch(e){
+        console.log(e);
+        res.status(500).send(error);
+    }
+    finally{
+        //await mongoose.connection.close();
+
+    }
+});
+app.get('/feedback', async (req, res) => {
+    try {
+    //    var connection= await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //         useNewUrlParser: true,
+    //         useUnifiedTopology: true,
+    //     });
+        const allData = await feedbacks.find();
+        res.json(allData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    } finally {
+       // await mongoose.connection.close();
+    }
+});
+app.get('/mailing', async (req, res) => {
+    try {
+    //    var connection= await mongoose.connect('mongodb+srv://shayan:Nidonido1@cluster0.zsgopc1.mongodb.net/?retryWrites=true&w=majority', {
+    //         useNewUrlParser: true,
+    //         useUnifiedTopology: true,
+    //     });
+        const allData = await mailings.find();
+        res.json(allData);
+    } catch (error) {
+        console.log(error);
+        res.status(500).send(error);
+    } finally {
+       // await mongoose.connection.close();
     }
 });
 app.get('/meditation', async (req, res) => {
